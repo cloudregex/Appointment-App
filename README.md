@@ -16,11 +16,11 @@ Authenticate a tenant and receive a token for subsequent requests.
 
 ```json
 {
-    "db_host": "localhost",
+    "db_host": "127.0.0.1",
     "db_port": "3306",
-    "db_name": "tenant_database",
-    "db_username": "tenant_user",
-    "db_password": "tenant_password"
+    "db_name": "appointmentapp",
+    "db_username": "appointmentapp",
+    "db_password": "appointmentapp"
 }
 ```
 
