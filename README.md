@@ -1,61 +1,117 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# php artisan db:seed
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Multi-Tenant Laravel API
 
-## About Laravel
+This is a multi-tenant Laravel application with API endpoints for tenant authentication and user management.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## API Endpoints
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 1. Tenant Login
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Authenticate a tenant and receive a token for subsequent requests.
 
-## Learning Laravel
+**Endpoint:** `POST /api/tenant/login`
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**Request Body:**
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```json
+{
+    "db_host": "localhost",
+    "db_port": "3306",
+    "db_name": "tenant_database",
+    "db_username": "tenant_user",
+    "db_password": "tenant_password"
+}
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Response:**
 
-## Laravel Sponsors
+```json
+{
+    "token": "base64_encoded_token",
+    "tenant": {
+        "id": 1,
+        "db_host": "localhost",
+        "db_port": "306",
+        "db_name": "tenant_database",
+        "db_username": "tenant_user",
+        "db_password": "tenant_password",
+        "created_at": "2023-01-01T00:00:00.00000Z",
+        "updated_at": "2023-01-01T00:00:00.000000Z"
+    },
+    "message": "Login successful"
+}
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+**Example using cURL:**
 
-### Premium Partners
+```bash
+curl -X POST http://localhost/api/tenant/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "db_host": "localhost",
+    "db_port": "3306",
+    "db_name": "tenant_database",
+    "db_username": "tenant_user",
+    "db_password": "tenant_password"
+  }'
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 2. Get Tenant Users
 
-## Contributing
+Retrieve all users for the authenticated tenant.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+**Endpoint:** `GET /api/users`
 
-## Code of Conduct
+**Headers:**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```http
+Authorization: Bearer [token_from_login]
+```
 
-## Security Vulnerabilities
+**Response:**
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```json
+[
+    {
+        "id": 1,
+        "name": "John Doe",
+        "email": "john@example.com",
+        "email_verified_at": null,
+        "created_at": "2023-01-01T00:00:00.000000Z",
+        "updated_at": "2023-01-01T00:00:00.000000Z"
+    },
+    {
+        "id": 2,
+        "name": "Jane Smith",
+        "email": "jane@example.com",
+        "email_verified_at": null,
+        "created_at": "2023-01-01T00:00:00.000000Z",
+        "updated_at": "2023-01-01T00:00:00.000000Z"
+    }
+]
+```
 
-## License
+**Example using cURL:**
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+curl -X GET http://localhost/api/users \
+  -H "Authorization: Bearer eyJ0ZW5hbnRfaWQiOjEsImRiX25hbWUiOiJ0ZW5hbnRfZGIiLCJpYXQiOjE2NzI1MzExOTl9"
+```
+
+## Authentication Flow
+
+1. **Login**: Make a POST request to `/api/tenant/login` with database credentials
+2. **Token**: Receive a base64-encoded token containing the tenant ID
+3. **Access**: Use the token in the `Authorization: Bearer [token]` header for subsequent requests
+4. **Middleware**: The TenantMiddleware will validate the token and set up the tenant database connection
+
+## Database Seeding
+
+To populate the database with dummy users, run:
+
+```bash
+php artisan db:seed
+```
+
+This will create 50 dummy users in the main users table and 50 dummy users in each tenant's database.
