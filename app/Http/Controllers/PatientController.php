@@ -56,8 +56,6 @@ class PatientController extends Controller
             'DrOID' => $validatedData['DrOID'] ?? null,
             'Tital' => $validatedData['Tital'] ?? null,
             'photo' => $validatedData['photo'] ?? null,
-            'created_at' => now(),
-            'updated_at' => now(),
         ]);
 
         // Retrieve the created patient
@@ -116,7 +114,6 @@ class PatientController extends Controller
             'DrOID' => $validatedData['DrOID'] ?? null,
             'Tital' => $validatedData['Tital'] ?? null,
             'photo' => $validatedData['photo'] ?? null,
-            'updated_at' => now(),
         ]);
 
         // Retrieve the updated patient
