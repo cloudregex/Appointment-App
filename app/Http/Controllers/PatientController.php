@@ -34,7 +34,6 @@ class PatientController extends Controller
     {
         // Validate request data
         $validatedData = $request->validate([
-            'RegNo' => 'nullable|string|max:50',
             'Pname' => 'nullable|string|max:50',
             'Paddress' => 'nullable|string|max:200',
             'Pcontact' => 'nullable|string|max:50',
@@ -44,16 +43,47 @@ class PatientController extends Controller
             'Tital' => 'nullable|string|max:50',
             'photo' => 'nullable|string',
         ]);
+        // Step 1: Extract initials from Patient Name (Ex: "Prashant Nale" => "PN")
+        $nameParts = explode(" ", $validatedData['Pname'] ?? '');
+        $initials = '';
+        foreach ($nameParts as $part) {
+            $initials .= strtoupper(substr($part, 0, 1));
+        }
 
+        if (empty($initials)) {
+            $initials = "XX"; // fallback if no name
+        }
+
+        // Step 2: Current year & month
+        $year  = date('Y');
+        $month = date('m');
+
+        // Step 3: Find last DrOID for this month
+        $lastEntry = DB::connection('tenant')
+            ->table('pateintreg')
+            ->where('DrOID', 'like', $initials . '-' . $year . '-' . $month . '-%')
+            ->orderByDesc('POID')
+            ->first();
+
+        // Step 4: Increment last sequence
+        $lastNumber = 0;
+        if ($lastEntry) {
+            $parts = explode("-", $lastEntry->DrOID);
+            $lastNumber = intval(end($parts));
+        }
+        $nextNumber = str_pad($lastNumber + 1, 4, "0", STR_PAD_LEFT);
+
+        // Step 5: Generate unique DrOID
+        $generatedDrOID = $initials . '-' . $year . '-' . $month . '-' . $nextNumber;
         // Insert patient data
         $patientId = DB::connection('tenant')->table('pateintreg')->insertGetId([
-            'RegNo' => $validatedData['RegNo'] ?? null,
             'Pname' => $validatedData['Pname'] ?? null,
             'Paddress' => $validatedData['Paddress'] ?? null,
             'Pcontact' => $validatedData['Pcontact'] ?? null,
             'Pgender' => $validatedData['Pgender'] ?? null,
             'Page' => $validatedData['Page'] ?? null,
             'DrOID' => $validatedData['DrOID'] ?? null,
+            'RegNo' => $generatedDrOID,
             'Tital' => $validatedData['Tital'] ?? null,
             'photo' => $validatedData['photo'] ?? null,
         ]);
@@ -92,7 +122,6 @@ class PatientController extends Controller
 
         // Validate request data
         $validatedData = $request->validate([
-            'RegNo' => 'nullable|string|max:50',
             'Pname' => 'nullable|string|max:50',
             'Paddress' => 'nullable|string|max:200',
             'Pcontact' => 'nullable|string|max:50',
@@ -105,7 +134,6 @@ class PatientController extends Controller
 
         // Update patient data
         DB::connection('tenant')->table('pateintreg')->where('POID', $id)->update([
-            'RegNo' => $validatedData['RegNo'] ?? null,
             'Pname' => $validatedData['Pname'] ?? null,
             'Paddress' => $validatedData['Paddress'] ?? null,
             'Pcontact' => $validatedData['Pcontact'] ?? null,
