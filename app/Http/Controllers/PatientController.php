@@ -142,4 +142,16 @@ class PatientController extends Controller
 
         return response()->json(['message' => 'Patient deleted successfully']);
     }
+
+    /**
+     * Display a listing of the patients.
+     */
+    public function doctorsList()
+    {
+        $patients = DB::connection('tenant')
+            ->table('drreg')
+            ->get();
+
+        return response()->json($patients);
+    }
 }

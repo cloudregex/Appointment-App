@@ -15,5 +15,5 @@ Route::middleware(['tenant'])->group(function () {
     Route::put('/patients/{id}', [PatientController::class, 'update']);
     Route::delete('/patients/{id}', [PatientController::class, 'destroy']);
     // Doctors List get
-    Route::get('/doctors-list', [Controller::class, 'doctorsList']);
+    Route::get('/doctors-list', [PatientController::class, 'doctorsList']);
 });
