@@ -21,7 +21,7 @@ class PatientController extends Controller
     public function index()
     {
         $patients = DB::connection('tenant')
-            ->table('patients')
+            ->table('pateintreg')
             ->paginate(20);
 
         return response()->json($patients);
@@ -43,12 +43,10 @@ class PatientController extends Controller
             'DrOID' => 'nullable|integer',
             'Tital' => 'nullable|string|max:50',
             'photo' => 'nullable|string',
-            'MemberID' => 'nullable|integer',
-            'AdharNo' => 'nullable|string|max:50',
         ]);
 
         // Insert patient data
-        $patientId = DB::connection('tenant')->table('patients')->insertGetId([
+        $patientId = DB::connection('tenant')->table('pateintreg')->insertGetId([
             'RegNo' => $validatedData['RegNo'] ?? null,
             'Pname' => $validatedData['Pname'] ?? null,
             'Paddress' => $validatedData['Paddress'] ?? null,
@@ -58,14 +56,12 @@ class PatientController extends Controller
             'DrOID' => $validatedData['DrOID'] ?? null,
             'Tital' => $validatedData['Tital'] ?? null,
             'photo' => $validatedData['photo'] ?? null,
-            'MemberID' => $validatedData['MemberID'] ?? null,
-            'AdharNo' => $validatedData['AdharNo'] ?? null,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         // Retrieve the created patient
-        $patient = DB::connection('tenant')->table('patients')->where('POID', $patientId)->first();
+        $patient = DB::connection('tenant')->table('pateintreg')->where('POID', $patientId)->first();
 
         return response()->json($patient, 201);
     }
@@ -75,7 +71,7 @@ class PatientController extends Controller
      */
     public function show($id)
     {
-        $patient = DB::connection('tenant')->table('patients')->where('POID', $id)->first();
+        $patient = DB::connection('tenant')->table('pateintreg')->where('POID', $id)->first();
 
         if (!$patient) {
             return response()->json(['error' => 'Patient not found'], 404);
@@ -90,7 +86,7 @@ class PatientController extends Controller
     public function update(Request $request, $id)
     {
         // Check if patient exists
-        $patient = DB::connection('tenant')->table('patients')->where('POID', $id)->first();
+        $patient = DB::connection('tenant')->table('pateintreg')->where('POID', $id)->first();
 
         if (!$patient) {
             return response()->json(['error' => 'Patient not found'], 404);
@@ -107,12 +103,10 @@ class PatientController extends Controller
             'DrOID' => 'nullable|integer',
             'Tital' => 'nullable|string|max:50',
             'photo' => 'nullable|string',
-            'MemberID' => 'nullable|integer',
-            'AdharNo' => 'nullable|string|max:50',
         ]);
 
         // Update patient data
-        DB::connection('tenant')->table('patients')->where('POID', $id)->update([
+        DB::connection('tenant')->table('pateintreg')->where('POID', $id)->update([
             'RegNo' => $validatedData['RegNo'] ?? null,
             'Pname' => $validatedData['Pname'] ?? null,
             'Paddress' => $validatedData['Paddress'] ?? null,
@@ -122,13 +116,11 @@ class PatientController extends Controller
             'DrOID' => $validatedData['DrOID'] ?? null,
             'Tital' => $validatedData['Tital'] ?? null,
             'photo' => $validatedData['photo'] ?? null,
-            'MemberID' => $validatedData['MemberID'] ?? null,
-            'AdharNo' => $validatedData['AdharNo'] ?? null,
             'updated_at' => now(),
         ]);
 
         // Retrieve the updated patient
-        $updatedPatient = DB::connection('tenant')->table('patients')->where('POID', $id)->first();
+        $updatedPatient = DB::connection('tenant')->table('pateintreg')->where('POID', $id)->first();
 
         return response()->json($updatedPatient);
     }
@@ -139,14 +131,14 @@ class PatientController extends Controller
     public function destroy($id)
     {
         // Check if patient exists
-        $patient = DB::connection('tenant')->table('patients')->where('POID', $id)->first();
+        $patient = DB::connection('tenant')->table('pateintreg')->where('POID', $id)->first();
 
         if (!$patient) {
             return response()->json(['error' => 'Patient not found'], 404);
         }
 
         // Delete the patient
-        DB::connection('tenant')->table('patients')->where('POID', $id)->delete();
+        DB::connection('tenant')->table('pateintreg')->where('POID', $id)->delete();
 
         return response()->json(['message' => 'Patient deleted successfully']);
     }
