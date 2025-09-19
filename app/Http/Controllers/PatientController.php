@@ -21,7 +21,8 @@ class PatientController extends Controller
     public function index()
     {
         $patients = DB::connection('tenant')
-            ->table('pateintreg')
+            ->table('pateintreg as p')
+            ->leftJoin('drreg as d', 'p.DrOID', '=', 'd.DrOID')
             ->paginate(20);
 
         return response()->json($patients);
@@ -34,7 +35,7 @@ class PatientController extends Controller
     {
         // Validate request data
         $validatedData = $request->validate([
-            'Pname' => 'nullable|string|max:50',
+            'Pname' => 'required|string|max:50',
             'Paddress' => 'nullable|string|max:200',
             'Pcontact' => 'nullable|string|max:50',
             'Pgender' => 'nullable|string|max:50',
@@ -43,56 +44,52 @@ class PatientController extends Controller
             'Tital' => 'nullable|string|max:50',
             'photo' => 'nullable|string',
         ]);
-        // Step 1: Extract initials from Patient Name (Ex: "Prashant Nale" => "PN")
-        $nameParts = explode(" ", $validatedData['Pname'] ?? '');
-        $initials = '';
-        foreach ($nameParts as $part) {
-            $initials .= strtoupper(substr($part, 0, 1));
-        }
 
-        if (empty($initials)) {
-            $initials = "XX"; // fallback if no name
-        }
+        // Step 1: Static prefix
+        $prefix = 'BCD';
 
         // Step 2: Current year & month
         $year  = date('Y');
         $month = date('m');
 
-        // Step 3: Find last DrOID for this month
+        // Step 3: Find last RegNo for this month
         $lastEntry = DB::connection('tenant')
             ->table('pateintreg')
-            ->where('DrOID', 'like', $initials . '-' . $year . '-' . $month . '-%')
+            ->where('RegNo', 'like', $prefix . '-' . $year . '-' . $month . '-%')
             ->orderByDesc('POID')
             ->first();
 
         // Step 4: Increment last sequence
         $lastNumber = 0;
         if ($lastEntry) {
-            $parts = explode("-", $lastEntry->DrOID);
+            $parts = explode("-", $lastEntry->RegNo);
             $lastNumber = intval(end($parts));
         }
         $nextNumber = str_pad($lastNumber + 1, 4, "0", STR_PAD_LEFT);
 
-        // Step 5: Generate unique DrOID
-        $generatedDrOID = $initials . '-' . $year . '-' . $month . '-' . $nextNumber;
-        // Insert patient data
+        // Step 5: Generate unique RegNo
+        $generatedRegNo = $prefix . '-' . $year . '-' . $month . '-' . $nextNumber;
+
+        // Step 6: Insert patient data
         $patientId = DB::connection('tenant')->table('pateintreg')->insertGetId([
-            'Pname' => $validatedData['Pname'] ?? null,
+            'Pname'    => $validatedData['Pname'] ?? null,
             'Paddress' => $validatedData['Paddress'] ?? null,
             'Pcontact' => $validatedData['Pcontact'] ?? null,
-            'Pgender' => $validatedData['Pgender'] ?? null,
-            'Page' => $validatedData['Page'] ?? null,
-            'DrOID' => $validatedData['DrOID'] ?? null,
-            'RegNo' => $generatedDrOID,
-            'Tital' => $validatedData['Tital'] ?? null,
-            'photo' => $validatedData['photo'] ?? null,
+            'Pgender'  => $validatedData['Pgender'] ?? null,
+            'Page'     => $validatedData['Page'] ?? null,
+            'DrOID'    => $validatedData['DrOID'] ?? null,
+            'RegNo'    => $generatedRegNo,
+            'Tital'    => $validatedData['Tital'] ?? null,
+            'photo'    => $validatedData['photo'] ?? null,
         ]);
 
-        // Retrieve the created patient
+        // Step 7: Retrieve the created patient
         $patient = DB::connection('tenant')->table('pateintreg')->where('POID', $patientId)->first();
 
+        // Step 8: Return response
         return response()->json($patient, 201);
     }
+
 
     /**
      * Display the specified patient.
@@ -122,7 +119,7 @@ class PatientController extends Controller
 
         // Validate request data
         $validatedData = $request->validate([
-            'Pname' => 'nullable|string|max:50',
+            'Pname' => 'required|string|max:50',
             'Paddress' => 'nullable|string|max:200',
             'Pcontact' => 'nullable|string|max:50',
             'Pgender' => 'nullable|string|max:50',
@@ -171,12 +168,16 @@ class PatientController extends Controller
     /**
      * Display a listing of the patients.
      */
-    public function doctorsList()
+    public function doctorsList(Request $request)
     {
-        $patients = DB::connection('tenant')
-            ->table('drreg')
-            ->get();
+        $query = DB::connection('tenant')->table('drreg');
 
-        return response()->json($patients);
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where('name', 'LIKE', "%{$search}%");
+        }
+        $doctors = $query->limit(10)->get();
+
+        return response()->json($doctors);
     }
 }
