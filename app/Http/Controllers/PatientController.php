@@ -180,4 +180,16 @@ class PatientController extends Controller
 
         return response()->json($doctors);
     }
+    public function PatientList(Request $request)
+    {
+        $query = DB::connection('tenant')->table('pateintreg');
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where('Pname', 'LIKE', "%{$search}%");
+        }
+        $patient = $query->limit(10)->get();
+
+        return response()->json($patient);
+    }
 }
