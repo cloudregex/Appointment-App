@@ -46,7 +46,7 @@ class PatientController extends Controller
         ]);
 
         // Step 1: Static prefix
-        $prefix = 'BCD';
+        $prefix = 'CH';
 
         // Step 2: Current year & month
         $year  = date('Y');
