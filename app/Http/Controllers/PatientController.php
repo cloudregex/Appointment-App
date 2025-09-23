@@ -18,15 +18,27 @@ class PatientController extends Controller
     /**
      * Display a listing of the patients.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $patients = DB::connection('tenant')
+        $query = DB::connection('tenant')
             ->table('pateintreg as p')
-            ->leftJoin('drreg as d', 'p.DrOID', '=', 'd.DrOID')
-            ->paginate(20);
+            ->leftJoin('drreg as d', 'p.DrOID', '=', 'd.DrOID');
+
+        // Apply search if query parameter is present
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('p.Pcontact', 'LIKE', "%{$search}%")
+                    ->orWhere('p.Paddress', 'LIKE', "%{$search}%")
+                    ->orWhere('p.Pname', 'LIKE', "%{$search}%")
+                    ->orWhere('p.RegNo', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $patients = $query->paginate(20);
 
         return response()->json($patients);
     }
+
 
     /**
      * Store a newly created patient.
@@ -46,7 +58,7 @@ class PatientController extends Controller
         ]);
 
         // Step 1: Static prefix
-        $prefix = 'CH';
+        $prefix =  $request->HospitalPrefix;
 
         // Step 2: Current year & month
         $year  = date('Y');

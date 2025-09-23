@@ -19,14 +19,24 @@ class AppointmentController extends Controller
     /**
      * Display a listing of the appointments.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $appointments = DB::connection('tenant')
-            ->table('appoiment')
-            ->paginate(20);
+        $query = DB::connection('tenant')
+            ->table('appoiment');
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('APPID', 'LIKE', "%{$search}%")
+                    ->orWhere('DrName', 'LIKE', "%{$search}%")
+                    ->orWhere('Name', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $appointments = $query->paginate(20);
 
         return response()->json($appointments);
     }
+
 
     /**
      * Store a newly created appointment.
@@ -43,7 +53,7 @@ class AppointmentController extends Controller
             'DrName' => 'nullable|string|max:50',
         ]);
         $formattedDate = Carbon::createFromFormat('d-m-Y', $request->Date)
-            ->format('Y-m-d H:i:s');
+            ->format('Y-m-d');
 
         // Get current year
         $year = now()->year;
@@ -121,10 +131,10 @@ class AppointmentController extends Controller
         ]);
         // Handle Date formatting conditionally
         try {
-            $formattedDate = Carbon::createFromFormat('d-m-Y', $request->Date)->format('Y-m-d H:i:s');
+            $formattedDate = Carbon::createFromFormat('d-m-Y', $request->Date)->format('Y-m-d');
         } catch (\Exception $e) {
             try {
-                $formattedDate = Carbon::parse($request->Date)->format('Y-m-d H:i:s');
+                $formattedDate = Carbon::parse($request->Date)->format('Y-m-d');
             } catch (\Exception $e) {
                 return response()->json(['error' => 'Invalid date format. Use d-m-Y or Y-m-d'], 422);
             }
