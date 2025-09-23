@@ -42,8 +42,30 @@ class AppointmentController extends Controller
             'DROID' => 'nullable|string|max:50',
             'DrName' => 'nullable|string|max:50',
         ]);
-        $formattedDate = Carbon::createFromFormat('d/m/Y', $request->Date)
+        $formattedDate = Carbon::createFromFormat('d-m-Y', $request->Date)
             ->format('Y-m-d H:i:s');
+
+        // Get current year
+        $year = now()->year;
+
+        // Find the latest APPID for this year
+        $lastAppointment = DB::connection('tenant')->table('appoiment')
+            ->where('APPID', 'like', $year . '-%')
+            ->orderBy('APPOID', 'desc')
+            ->first();
+
+        if ($lastAppointment) {
+            // Extract last increment
+            $parts = explode('-', $lastAppointment->APPID);
+            $lastIncrement = isset($parts[1]) ? (int)$parts[1] : 0;
+            $nextIncrement = $lastIncrement + 1;
+        } else {
+            $nextIncrement = 1;
+        }
+
+        // Generate new APPID
+        $newAppId = $year . '-' . $nextIncrement;
+
         // Insert appointment data
         $appointmentId = DB::connection('tenant')->table('appoiment')->insertGetId([
             'Date' => $formattedDate,
@@ -52,10 +74,11 @@ class AppointmentController extends Controller
             'Contact' => $validatedData['Contact'] ?? null,
             'DROID' => $validatedData['DROID'] ?? null,
             'DrName' => $validatedData['DrName'] ?? null,
+            'APPID' => $newAppId,
         ]);
 
         // Retrieve the created appointment
-        $appointment = DB::connection('tenant')->table('appoiment')->where('id', $appointmentId)->first();
+        $appointment = DB::connection('tenant')->table('appoiment')->where('APPOID', $appointmentId)->first();
 
         // Return response
         return response()->json($appointment, 201);
@@ -66,7 +89,7 @@ class AppointmentController extends Controller
      */
     public function show($id)
     {
-        $appointment = DB::connection('tenant')->table('appoiment')->where('id', $id)->first();
+        $appointment = DB::connection('tenant')->table('appoiment')->where('APPOID', $id)->first();
 
         if (!$appointment) {
             return response()->json(['error' => 'Appointment not found'], 404);
@@ -81,7 +104,7 @@ class AppointmentController extends Controller
     public function update(Request $request, $id)
     {
         // Check if appointment exists
-        $appointment = DB::connection('tenant')->table('appoiment')->where('id', $id)->first();
+        $appointment = DB::connection('tenant')->table('appoiment')->where('APPOID', $id)->first();
 
         if (!$appointment) {
             return response()->json(['error' => 'Appointment not found'], 404);
@@ -96,11 +119,19 @@ class AppointmentController extends Controller
             'DROID' => 'nullable|string|max:50',
             'DrName' => 'nullable|string|max:50',
         ]);
-        $formattedDate = Carbon::createFromFormat('d/m/Y', $request->Date)
-            ->format('Y-m-d H:i:s');
+        // Handle Date formatting conditionally
+        try {
+            $formattedDate = Carbon::createFromFormat('d-m-Y', $request->Date)->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            try {
+                $formattedDate = Carbon::parse($request->Date)->format('Y-m-d H:i:s');
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'Invalid date format. Use d-m-Y or Y-m-d'], 422);
+            }
+        }
 
         // Update appointment data
-        DB::connection('tenant')->table('appoiment')->where('id', $id)->update([
+        DB::connection('tenant')->table('appoiment')->where('APPOID', $id)->update([
             'Date' => $formattedDate,
             'POID' => $validatedData['POID'],
             'Name' => $validatedData['Name'],
@@ -110,7 +141,7 @@ class AppointmentController extends Controller
         ]);
 
         // Retrieve the updated appointment
-        $updatedAppointment = DB::connection('tenant')->table('appoiment')->where('id', $id)->first();
+        $updatedAppointment = DB::connection('tenant')->table('appoiment')->where('APPOID', $id)->first();
 
         return response()->json($updatedAppointment);
     }
@@ -121,14 +152,14 @@ class AppointmentController extends Controller
     public function destroy($id)
     {
         // Check if appointment exists
-        $appointment = DB::connection('tenant')->table('appoiment')->where('id', $id)->first();
+        $appointment = DB::connection('tenant')->table('appoiment')->where('APPOID', $id)->first();
 
         if (!$appointment) {
             return response()->json(['error' => 'Appointment not found'], 404);
         }
 
         // Delete the appointment
-        DB::connection('tenant')->table('appoiment')->where('id', $id)->delete();
+        DB::connection('tenant')->table('appoiment')->where('APPOID', $id)->delete();
 
         return response()->json(['message' => 'Appointment deleted successfully']);
     }
