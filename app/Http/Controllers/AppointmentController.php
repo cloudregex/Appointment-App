@@ -32,6 +32,20 @@ class AppointmentController extends Controller
             });
         }
 
+        // Start date and End date filter
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+
+        if ($startDate) {
+            // If start date and end date are the same, treat it as a single date filter
+            if ($startDate == $endDate) {
+                $query->whereDate('Date', '=', $startDate);
+            } else {
+                $query->whereDate('Date', '>=', $startDate)
+                    ->whereDate('Date', '<=', $endDate);
+            }
+        }
+
         $appointments = $query->paginate(20);
 
         return response()->json($appointments);
