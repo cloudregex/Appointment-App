@@ -67,17 +67,10 @@ class PatientController extends Controller
         // Step 3: Find last RegNo (ignoring prefix)
         $lastEntry = DB::connection('tenant')
             ->table('pateintreg')
-            ->where('RegNo', 'like', '%/' . $year . '/' . $month . '/%')
             ->orderByDesc('POID')
             ->first();
 
-        // Step 4: Increment last sequence
-        $lastNumber = 0;
-        if ($lastEntry) {
-            $parts = explode("/", $lastEntry->RegNo);
-            $lastNumber = intval(end($parts));
-        }
-        $nextNumber = $lastNumber + 1;
+        $nextNumber =  $lastEntry->POID + 1;
 
         // Step 5: Generate RegNo
         $generatedRegNo = $prefix . '/' . $year . '/' . $month . '/' . $nextNumber;
