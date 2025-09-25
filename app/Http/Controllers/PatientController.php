@@ -67,7 +67,6 @@ class PatientController extends Controller
         // Step 3: Find last RegNo for this month
         $lastEntry = DB::connection('tenant')
             ->table('pateintreg')
-            ->where('RegNo', 'like', $prefix . '-' . $year . '-' . $month . '-%')
             ->orderByDesc('POID')
             ->first();
 
