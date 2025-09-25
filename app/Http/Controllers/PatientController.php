@@ -73,7 +73,7 @@ class PatientController extends Controller
         $nextNumber =  $lastEntry->POID + 1;
 
         // Step 5: Generate RegNo
-        $generatedRegNo = $prefix . '/' . $year . '/' . $month . '/' . $nextNumber;
+        $generatedRegNo = $prefix . '-' . $year . '/' . $month . '/' . $nextNumber;
 
         // Step 6: Insert patient data
         $patientId = DB::connection('tenant')->table('pateintreg')->insertGetId([
