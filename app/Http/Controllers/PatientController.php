@@ -64,22 +64,23 @@ class PatientController extends Controller
         $year  = date('Y');
         $month = date('m');
 
-        // Step 3: Find last RegNo for this month
+        // Step 3: Find last RegNo (ignoring prefix)
         $lastEntry = DB::connection('tenant')
             ->table('pateintreg')
+            ->where('RegNo', 'like', '%/' . $year . '/' . $month . '/%')
             ->orderByDesc('POID')
             ->first();
 
         // Step 4: Increment last sequence
         $lastNumber = 0;
         if ($lastEntry) {
-            $parts = explode("-", $lastEntry->RegNo);
+            $parts = explode("/", $lastEntry->RegNo);
             $lastNumber = intval(end($parts));
         }
-        $nextNumber = str_pad($lastNumber + 1, 4, "0", STR_PAD_LEFT);
+        $nextNumber = $lastNumber + 1;
 
-        // Step 5: Generate unique RegNo
-        $generatedRegNo = $prefix . '-' . $year . '-' . $month . '-' . $nextNumber;
+        // Step 5: Generate RegNo
+        $generatedRegNo = $prefix . '/' . $year . '/' . $month . '/' . $nextNumber;
 
         // Step 6: Insert patient data
         $patientId = DB::connection('tenant')->table('pateintreg')->insertGetId([
