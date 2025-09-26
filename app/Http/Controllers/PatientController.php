@@ -54,7 +54,7 @@ class PatientController extends Controller
             'Page' => 'nullable|string|max:50',
             'DrOID' => 'nullable|integer',
             'Tital' => 'nullable|string|max:50',
-            'photo' => 'nullable|string',
+            // 'photo' => 'nullable|string',
         ]);
 
         // Step 1: Static prefix
@@ -85,7 +85,7 @@ class PatientController extends Controller
             'DrOID'    => $validatedData['DrOID'] ?? null,
             'RegNo'    => $generatedRegNo,
             'Tital'    => $validatedData['Tital'] ?? null,
-            'photo'    => $validatedData['photo'] ?? null,
+            // 'photo'    => $validatedData['photo'] ?? null,
         ]);
 
         // Step 7: Retrieve the created patient
@@ -131,7 +131,7 @@ class PatientController extends Controller
             'Page' => 'nullable|string|max:50',
             'DrOID' => 'nullable|integer',
             'Tital' => 'nullable|string|max:50',
-            'photo' => 'nullable|string',
+            // 'photo' => 'nullable|string',
         ]);
 
         // Update patient data
@@ -143,7 +143,7 @@ class PatientController extends Controller
             'Page' => $validatedData['Page'] ?? null,
             'DrOID' => $validatedData['DrOID'] ?? null,
             'Tital' => $validatedData['Tital'] ?? null,
-            'photo' => $validatedData['photo'] ?? null,
+            // 'photo' => $validatedData['photo'] ?? null,
         ]);
 
         // Retrieve the updated patient
