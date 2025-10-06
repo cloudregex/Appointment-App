@@ -39,7 +39,7 @@ class TPRController extends Controller
         }
 
         try {
-            $rows = $q->latest()->paginate(20);
+            $rows = $q->latest('Time')->paginate(20);
             return response()->json($rows, 200);
         } catch (\Exception $e) {
             return response()->json([
