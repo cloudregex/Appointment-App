@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\CurrentIPD;
 use App\Http\Controllers\TenantAuthController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\TPRController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/tenant/login', [TenantAuthController::class, 'login']);
@@ -26,4 +28,14 @@ Route::middleware(['tenant'])->group(function () {
     // Doctors List get
     Route::get('/doctors-list', [PatientController::class, 'doctorsList']);
     Route::get('/patients-list', [PatientController::class, 'PatientList']);
+
+    // Current IPD List get
+    Route::get('/current-ipd', [CurrentIPD::class, 'index']);
+
+    // Tpr routes
+    Route::get('/tpr', [TPRController::class, 'index']);
+    Route::post('/tpr', [TPRController::class, 'store']);
+    Route::get('/tpr/{id}', [TPRController::class, 'show']);
+    Route::put('/tpr/{id}', [TPRController::class, 'update']);
+    Route::delete('/tpr/{id}', [TPRController::class, 'destroy']);
 });
