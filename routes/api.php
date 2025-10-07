@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\CurrentIPD;
+use App\Http\Controllers\DrugController;
 use App\Http\Controllers\TenantAuthController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\TPRController;
@@ -28,6 +29,8 @@ Route::middleware(['tenant'])->group(function () {
     // Doctors List get
     Route::get('/doctors-list', [PatientController::class, 'doctorsList']);
     Route::get('/patients-list', [PatientController::class, 'PatientList']);
+    Route::get('/item-list', [PatientController::class, 'ItemList']);
+    Route::get('/content-list', [PatientController::class, 'ContentList']);
 
     // Current IPD List get
     Route::get('/current-ipd', [CurrentIPD::class, 'index']);
@@ -38,4 +41,11 @@ Route::middleware(['tenant'])->group(function () {
     Route::get('/tpr/{id}', [TPRController::class, 'show']);
     Route::put('/tpr/{id}', [TPRController::class, 'update']);
     Route::delete('/tpr/{id}', [TPRController::class, 'destroy']);
+
+    // Tpr routes
+    Route::get('/drug-chart', [DrugController::class, 'index']);
+    Route::post('/drug-chart', [DrugController::class, 'store']);
+    Route::get('/drug-chart/{id}', [DrugController::class, 'show']);
+    Route::put('/drug-chart/{id}', [DrugController::class, 'update']);
+    Route::delete('/drug-chart/{id}', [DrugController::class, 'destroy']);
 });

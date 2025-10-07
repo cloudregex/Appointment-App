@@ -197,4 +197,28 @@ class PatientController extends Controller
 
         return response()->json($patient);
     }
+    public function ItemList(Request $request)
+    {
+        $query = DB::connection('tenant')->table('itemreg');
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where('ItemName', 'LIKE', "%{$search}%");
+        }
+        $patient = $query->limit(10)->get();
+
+        return response()->json($patient);
+    }
+    public function ContentList(Request $request)
+    {
+        $query = DB::connection('tenant')->table('content');
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where('ContentName', 'LIKE', "%{$search}%");
+        }
+        $patient = $query->limit(10)->get();
+
+        return response()->json($patient);
+    }
 }

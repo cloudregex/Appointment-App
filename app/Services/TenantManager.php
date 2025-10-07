@@ -21,10 +21,11 @@ class TenantManager
             'database' => $tenant->db_name,
             'username' => $tenant->db_username,
             'password' => $tenant->db_password,
-            'charset'  => 'utf8mb4',
+            'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
-            'prefix'   => '',
-            'strict'   => true,
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
         ]);
 
         DB::purge('tenant');
