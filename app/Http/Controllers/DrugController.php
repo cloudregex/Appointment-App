@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\TenantManager;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -23,29 +24,24 @@ class DrugController extends Controller
      */
     public function index(Request $request)
     {
-        $q = DB::connection('tenant')->table('DrugChart');
+        $q = DB::connection('tenant')
+            ->table('DrugChart')
+            ->where('IPDNo', $request->ipdNo);
 
-        if ($request->filled('ipdNo')) {
-            $q->where('IPDNo', $request->ipdNo);
-        }
-
-        if ($request->filled('fromDate') && $request->filled('toDate')) {
-            $q->whereBetween('Date', [$request->fromDate, $request->toDate]);
-        }
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $q->where(function ($w) use ($search) {
-                $w->where('Medicine', 'LIKE', "%{$search}%")
-                    ->orWhere('Dosage', 'LIKE', "%{$search}%");
-            });
+        if ($request->filled('Date')) {
+            $q->whereDate('Date', $request->Date);
+        } else {
+            $q->whereDate('Date', Carbon::today());
         }
 
         try {
-            $rows = $q->latest('Date')->paginate(20);
+            $rows = $q->paginate(20);
             return response()->json($rows, 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error fetching records', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Error fetching records',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
