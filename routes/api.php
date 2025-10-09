@@ -35,6 +35,7 @@ Route::middleware(['tenant'])->group(function () {
 
     // Current IPD List get
     Route::get('/current-ipd', [CurrentIPD::class, 'index']);
+    Route::delete('/current-ipd/{id}', [CurrentIPD::class, 'destroy']);
 
     // Tpr routes
     Route::get('/tpr', [TPRController::class, 'index']);

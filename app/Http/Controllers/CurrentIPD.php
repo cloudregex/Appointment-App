@@ -36,4 +36,25 @@ class CurrentIPD extends Controller
 
         return response()->json($patients);
     }
+
+    public function destroy($id)
+    {
+        try {
+            $deleted = DB::connection('tenant')
+                ->table('currentipd')
+                ->where('CIPDOID', $id)
+                ->delete();
+
+            if (!$deleted) {
+                return response()->json(['message' => 'Record not found'], 404);
+            }
+
+            return response()->json(['message' => 'IPD record deleted'], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to delete record',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
