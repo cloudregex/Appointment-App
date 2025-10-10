@@ -32,6 +32,8 @@ Route::middleware(['tenant'])->group(function () {
     Route::get('/doctors-list', [PatientController::class, 'doctorsList']);
     Route::get('/patients-list', [PatientController::class, 'PatientList']);
     Route::get('/item-list', [PatientController::class, 'ItemList']);
+    Route::get('/invention-list', [PatientController::class, 'inventionList']);
+    Route::get('/advice-list', [PatientController::class, 'adviceList']);
     Route::get('/content-list', [PatientController::class, 'ContentList']);
 
     // Current IPD List get

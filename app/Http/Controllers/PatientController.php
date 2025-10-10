@@ -209,6 +209,33 @@ class PatientController extends Controller
 
         return response()->json($patient);
     }
+
+     public function inventionList(Request $request)
+    {
+        $query = DB::connection('tenant')->table('TestReg');
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where('TestName', 'LIKE', "%{$search}%");
+        }
+        $patient = $query->limit(10)->get();
+
+        return response()->json($patient);
+    }
+
+     public function adviceList(Request $request)
+    {
+        $query = DB::connection('tenant')->table('Adv');
+
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where('AdvName', 'LIKE', "%{$search}%");
+        }
+        $patient = $query->limit(10)->get();
+
+        return response()->json($patient);
+    }
+
     public function ContentList(Request $request)
     {
         $query = DB::connection('tenant')->table('content');
