@@ -22,7 +22,7 @@ class PrescriptionController extends Controller
     {
         $query = DB::connection('tenant')
             ->table('prescription')
-             ->distinct('POID');
+            ->distinct('POID');
 
         // Apply search if query parameter is present
         if ($search = $request->get('search')) {
@@ -54,7 +54,6 @@ class PrescriptionController extends Controller
             'History' => 'nullable|string|max:200',
             'ItemName' => 'nullable|string|max:200',
             'ContentName' => 'nullable|string|max:200',
-            'Total' => 'nullable|string|max:50',
             'Notes' => 'nullable|string|max:200',
             'Advice' => 'nullable|string|max:600',
             'ApDate' => 'nullable|date',
